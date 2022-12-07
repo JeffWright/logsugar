@@ -1,4 +1,4 @@
-package dev.jtbw.log
+package dev.jtbw.logsugar
 
 import java.util.PriorityQueue
 

@@ -1,37 +1,34 @@
-package dev.jtbw.log
+package dev.jtbw.logsugar
+
+import dev.jtbw.logsugar.LogSugarTiming.timeFmt
+
+private const val NEXT_LINE = "↘"
+private val CANDY = "\uD83C\uDF6C" // 🍬
+private val DIVIDER = " $CANDY "
+private const val COMBINING_UNDERSCORE = "̲"
 
 object LogSugar {
-  private const val NEXT_LINE = "↘"
-  private const val DIVIDER = " \uD83C\uDF6C " // 🍬
 
   private data class Config(
     val maxLineWidth: Int = 4000,
-    /**
-     * Logs whose left section is above this value won't affect the running aggregate. (they will
-     * NOT be truncated) TODO JTW better name
-     */
     val maxLeftSectionWidth: Int = 75,
-    /**
-     * Controls how to pad the left section to try to keep messages aligned. Options are:
-     * ```
-     *    MatchLongest: match the longest one seen so far, up to a max
-     *    Constant: constant width
-     *    P9X: Track the p95 (configurable) of left section widths
-     * ```
-     */
     val leftSectionWidth: RunningAggregate = RunningAggregate.MatchLongest(75),
     val padding: Char = ' ',
-    val getTag: (Throwable) -> String = ::getClassBreadcrumb,
+    val useColors: Boolean = true,
+    val replaceAts: Boolean = true,
     val writer: Writer = { tag, message -> println("$tag: $message") }
   )
 
   private var config: Config = Config()
+  internal val useColors
+    get() = config.useColors
 
   fun configure(
+    /** Logs longer than this will be wrapped */
     maxLineWidth: Int = config.maxLineWidth,
     /**
      * Logs whose left section is above this value won't affect the running aggregate. (they will
-     * NOT be truncated) TODO JTW better name
+     * NOT be truncated)
      */
     maxLeftSectionWidth: Int = config.maxLeftSectionWidth,
     /**
@@ -43,8 +40,14 @@ object LogSugar {
      * ```
      */
     leftSectionWidth: RunningAggregate = config.leftSectionWidth,
+    /** Character with which the left section is padded */
     padding: Char = config.padding,
-    getTag: (Throwable) -> String = config.getTag,
+    useColors: Boolean = config.useColors,
+    /**
+     * having the word 'at' in your log messages will break the regex IntelliJ/Android Studio uses
+     * to pick out clickable file names. If this is set to true, LogSugar will replace at->@
+     */
+    replaceAts: Boolean = config.replaceAts,
     writer: Writer = config.writer,
   ) {
     config =
@@ -53,10 +56,19 @@ object LogSugar {
         maxLeftSectionWidth = maxLeftSectionWidth,
         leftSectionWidth = leftSectionWidth,
         padding = padding,
-        getTag = getTag,
+        useColors = useColors,
+        replaceAts = replaceAts,
         writer = writer,
       )
+    // Record starting time:
+    LogSugarTiming.startTime
+    if (!haveLoggedStart) {
+      haveLoggedStart = true
+      logDivider("Begin Session", 5)
+    }
   }
+
+  private var haveLoggedStart = false
 
   private fun write(
     tag: String,
@@ -66,7 +78,16 @@ object LogSugar {
     details: String
   ) {
     val paddingString = config.padding.toString().repeat(padding)
-    val message = "$infoLeft$paddingString$infoRight$DIVIDER$details"
+    val message =
+      "$infoLeft$paddingString$infoRight$DIVIDER$details".let {
+        if (config.replaceAts) {
+          it.replace(Regex("\\bat\\b"), "a̲t̲")
+          // it.replace(Regex(" at "), " a̲t̲ ")
+        } else {
+          it
+        }
+      }
+
     config.writer(tag, message)
   }
 
@@ -105,12 +126,18 @@ object LogSugar {
   ) {
 
     val tag = getClassBreadcrumb(breadcrumb)
-    val infoLeft = "${time}s"
-    val infoRight = header
+    val infoLeft = timeFmt.colorized(ANSI_YELLOW)
+    val infoRight = header.colorized(ANSI_BRIGHT_GREEN)
 
-    val leftMinSize = infoLeft.length + 1 + infoRight.length
-    val leftActualSize = updateSectionWidth(tag.length, leftMinSize)
+    val infoLeftWidth = infoLeft.width()
+    val infoRightWidth = infoRight.width()
+
+    val leftMinSize = infoLeft.width() + 1 + infoRight.width()
+    val leftActualSize = updateSectionWidth(tagWidth = tag.length, leftWidth = leftMinSize)
     require(leftActualSize >= leftMinSize)
+    // println("leftActualSize = $leftActualSize")
+    // println("iL = ${infoLeft.width()} : >$infoLeft<")
+    // println("iR = ${infoRight.width()} : >$infoRight<")
 
     val widthAvailableForDetails = config.maxLineWidth - leftActualSize - DIVIDER.length
 
@@ -118,7 +145,7 @@ object LogSugar {
     lines(widthAvailableForDetails).forEach { line ->
       if (isFirst) {
         isFirst = false
-        val padding = leftActualSize - infoLeft.length - infoRight.length
+        val padding = leftActualSize - infoLeftWidth - infoRightWidth
         write(tag, infoLeft, padding, infoRight, line)
       } else {
         val padding = leftActualSize
@@ -183,12 +210,27 @@ fun log(details: String? = "") = LogSugar.log(null, details)
 fun log(tag: String?, details: String?, breadcrumb: Throwable? = null) =
   LogSugar.log(tag, details, breadcrumb)
 
-/** Print a debug message */
+/** Print a multi-line debug message */
 fun log(tag: String?, detailsSequence: Sequence<String>) = LogSugar.log(tag, detailsSequence)
 
+/** Print a debug message indicating something is wrong. It will be very visible */
+fun logWtf(details: String? = null) = logWtf(null, details)
+
+/** Print a debug message indicating something is wrong. It will be very visible */
+fun logWtf(tag: String?, details: String?, breadcrumb: Throwable? = null) =
+  LogSugar.log(tag, (details ?: "        WTF        ").colorizedWtf(), breadcrumb)
+
+private fun String.colorizedWtf(): String = colorized(ANSI_RED_BG, ANSI_BRIGHT_BLACK)
+
 /** Print a debug message */
-fun log(err: Throwable) {
-  log(err.stackTraceToString())
+fun log(tag: String? = null, err: Throwable) {
+  log(
+    tag,
+    err.stackTraceToString().let { stackTrace ->
+      val firstLine = stackTrace.substringBefore("\n").colorized(ANSI_BRIGHT_RED)
+      firstLine + "\n" + stackTrace.substringAfter("\n")
+    }
+  )
 }
 
 /**
@@ -200,14 +242,41 @@ fun <T> T.inspect(tag: String? = null, toString: ((T) -> Any?) = { it.toString()
   return this
 }
 
-fun logStackTrace(message: String?) = log(TracerException(message))
+fun Throwable.inspect(tag: String? = null) = log(tag, this)
 
-fun logStackTrace() = log(TracerException())
+fun logStackTrace(message: String? = null) = log(null, TracerException(message))
 
-fun logDivider() = log("------------------------------------------------")
+/** [weight] in 0-5 */
+fun logDivider(message: String? = null, weight: Int = 3) {
+  val formattedMessage =
+    message?.let {
+      when (weight) {
+        0 -> ". $it ."
+        1 -> "◁ $it ▷     "
+        2 -> "◀ $it ▶"
+        3 -> "◀ $it ▶".colorized(ANSI_YELLOW)
+        4 -> "  $it  ".colorized(ANSI_BRIGHT_YELLOW)
+        5 -> "  $it  ".colorized(ANSI_BRIGHT_YELLOW_BG, ANSI_BRIGHT_BLACK)
+        else -> error("Please report this to the maintainer of LogSugar")
+      }
+    }
+      ?: ""
+  var ruleColor: String? = null
+  val rule =
+    when (weight.coerceIn(0, 5)) {
+      0 -> "      "
+      1 -> ".     "
+      2 -> "- - - "
+      3 -> "——————".also { ruleColor = ANSI_YELLOW }
+      4 -> "      ".also { ruleColor = ANSI_WHITE_BG }
+      5 -> "      ".also { ruleColor = ANSI_BRIGHT_YELLOW_BG }
+      else -> error("Please report this to the maintainer of LogSugar")
+    }
+
+  val pre = rule.repeat(3).colorized(ruleColor)
+  val text = formattedMessage
+  val post = rule.repeat(10).colorized(ruleColor)
+  log("$pre$text$post")
+}
 
 class TracerException(message: String? = null) : Throwable(message)
-
-// TODO JTW:
-// timing (delta)
-// counts

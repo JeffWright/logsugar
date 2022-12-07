@@ -1,4 +1,4 @@
-package dev.jtbw.log
+package dev.jtbw.logsugar
 
 fun <T, I : Collection<T>> I.inspectEach(
   msg: String? = null,
@@ -9,8 +9,8 @@ fun <T, I : Collection<T>> I.inspectEach(
   log(
     msg,
     sequence {
-      yield("($clazz, size=$size)")
-      forEachIndexed { idx, item -> yield("  [${idx}] -> ${toString(item)}") }
+      yield("($clazz, size = $size)".colorized(ANSI_BLUE))
+      forEachIndexed { idx, item -> yield("  [${idx}] -> ".colorized(ANSI_BLUE) + toString(item)) }
     }
   )
   return this
@@ -25,8 +25,8 @@ fun <K, V, M : Map<K, V>> M.inspectEach(
   log(
     msg,
     sequence {
-      yield("($clazz, size=$size)")
-      entries.forEach { yield("  [${it.key}] -> ${toString(it.value)}") }
+      yield("($clazz, size = $size)".colorized(ANSI_BLUE))
+      entries.forEach { yield("  [${it.key}] -> ".colorized(ANSI_BLUE) + toString(it.value)) }
     }
   )
   return this

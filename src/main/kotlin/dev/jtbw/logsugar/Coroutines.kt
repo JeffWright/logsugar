@@ -1,4 +1,4 @@
-package dev.jtbw.log
+package dev.jtbw.logsugar
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
@@ -11,7 +11,7 @@ fun <T> Flow<T>.inspectEach(
   var count = 0
   val breadcrumb = Throwable()
   return this.onEach {
-    log(tag, "[$count] -> ${toString(it)}", breadcrumb)
+    log(tag, "[$count] -> ".colorized(ANSI_BLUE) + toString(it), breadcrumb)
     count++
   }
 }

@@ -1,7 +1,7 @@
-package dev.jtbw.log
+package dev.jtbw.logsugar
 
-import dev.jtbw.log.inspect as ktinspect
-import dev.jtbw.log.log as ktlog
+import dev.jtbw.logsugar.inspect as ktinspect
+import dev.jtbw.logsugar.log as ktlog
 
 /*
  * These are just aliases to make calling from Java a little nicer
