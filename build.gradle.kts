@@ -16,6 +16,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     // TODO JTW separate artifacts for coroutines/rx support
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("io.reactivex.rxjava2:rxjava:2.2.21")
+
 }
 
 tasks.test {
@@ -43,7 +45,7 @@ publishing {
         create<MavenPublication>("maven") {
 
             groupId = "com.github.JeffWright"
-            version = "0.2.0"
+            version = "0.3.1"
             artifactId = "logsugar"
 
             from(components["java"])

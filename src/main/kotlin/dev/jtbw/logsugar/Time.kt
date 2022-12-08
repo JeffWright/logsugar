@@ -20,7 +20,7 @@ object LogSugarTiming {
         append(" for ")
         append(it.toString().colorized(ANSI_BRIGHT_BLUE))
       }
-      append(" (started at ${formatTime(start)})".colorized(ANSI_GREEN))
+      append(" (started @ ${formatTime(start)})".colorized(ANSI_GREEN))
     }
   }
 }

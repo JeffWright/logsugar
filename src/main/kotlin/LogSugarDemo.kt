@@ -12,6 +12,9 @@ import dev.jtbw.logsugar.logWtf
 import dev.jtbw.logsugar.runTiming
 import dev.jtbw.logsugar.runTimingSuspend
 import dev.jtbw.logsugar.startTiming
+import io.reactivex.Completable
+import io.reactivex.Observable
+import io.reactivex.Single
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -56,6 +59,11 @@ internal class EntryPoint {
     runBlocking { flowOf(1, 2, 3).inspectEach("some flow").launchIn(this) }
     log("All versions of .inspectEach() still have the optional transform:")
     runBlocking { flowOf(1, 2, 3).inspectEach("some flow") { "item was $it" }.launchIn(this) }
+
+    log("On RxJava Observables/Singles/Completables")
+    Observable.just("X", "Y", "Z").inspectEach("Observable").blockingLast()
+    Single.just("lonely").inspectEach("Single").blockingGet()
+    Completable.fromCallable { "completeme" }.inspectEach("Completable").blockingGet()
 
     logDivider("Exceptions & Stack Traces")
     runCatching { null!! }.exceptionOrNull()?.inspect("oops!")

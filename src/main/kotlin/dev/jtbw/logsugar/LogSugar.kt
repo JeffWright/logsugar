@@ -14,8 +14,8 @@ object LogSugar {
     val maxLeftSectionWidth: Int = 75,
     val leftSectionWidth: RunningAggregate = RunningAggregate.MatchLongest(75),
     val padding: Char = ' ',
-    val useColors: Boolean = true,
-    val replaceAts: Boolean = true,
+    val useColors: Boolean = false,
+    val replaceAts: Boolean = false,
     val writer: Writer = { tag, message -> println("$tag: $message") }
   )
 
@@ -168,6 +168,8 @@ object LogSugar {
   private fun isAcceptable(element: StackTraceElement): Boolean {
     if (element.className.startsWith("kotlin")) {
       return false
+    } else if (element.className.startsWith("io.reactivex")) {
+      return false
     }
     return "dev.jtbw.log" !in element.className
   }
@@ -218,11 +220,19 @@ fun logWtf(details: String? = null) = logWtf(null, details)
 
 /** Print a debug message indicating something is wrong. It will be very visible */
 fun logWtf(tag: String?, details: String?, breadcrumb: Throwable? = null) =
-  LogSugar.log(tag, (details ?: "        WTF        ").colorizedWtf(), breadcrumb)
+  if(LogSugar.useColors) {
+    log(tag, (details ?: "        WTF        ").colorizedWtf(), breadcrumb)
+  } else {
+    val msg = (details ?: "WTF")
+    log(tag, "")
+    log(tag, "!!!!!!!!!!!!!!!! "+(details ?: "WTF") + " !!!!!!!!!!!!!!!!", breadcrumb)
+    log(tag, "")
+  }
 
 private fun String.colorizedWtf(): String = colorized(ANSI_RED_BG, ANSI_BRIGHT_BLACK)
 
-/** Print a debug message */
+fun log(err: Throwable) = log(null, err)
+
 fun log(tag: String? = null, err: Throwable) {
   log(
     tag,
@@ -268,8 +278,16 @@ fun logDivider(message: String? = null, weight: Int = 3) {
       1 -> ".     "
       2 -> "- - - "
       3 -> "——————".also { ruleColor = ANSI_YELLOW }
-      4 -> "      ".also { ruleColor = ANSI_WHITE_BG }
-      5 -> "      ".also { ruleColor = ANSI_BRIGHT_YELLOW_BG }
+      4 -> if(LogSugar.useColors) {
+        "      ".also { ruleColor = ANSI_WHITE_BG }
+      }else {
+        "▄▄▄▄▄▄"
+      }
+      5 -> if(LogSugar.useColors) {
+        "      ".also { ruleColor = ANSI_BRIGHT_YELLOW_BG }
+      } else {
+        "██████"
+      }
       else -> error("Please report this to the maintainer of LogSugar")
     }
 
