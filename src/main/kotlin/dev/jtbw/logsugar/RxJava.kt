@@ -12,8 +12,7 @@ fun <T> Observable<T>.inspectEach(
 ): Observable<T> {
   var count = 0
   val breadcrumb = Throwable()
-  return this
-    .doOnEach { notification ->
+  return this.doOnEach { notification ->
       when {
         notification.isOnNext -> {
           val item = notification.value!!
@@ -25,7 +24,7 @@ fun <T> Observable<T>.inspectEach(
           log(tag, notification.error!!)
         }
         notification.isOnComplete -> {
-          if(includeEvents) {
+          if (includeEvents) {
             log(tag, "Observable completed ($count items)")
           }
         }
@@ -50,17 +49,14 @@ fun <T> Single<T>.inspectEach(
   toString: ((T) -> String?) = { it.toString() }
 ): Single<T> {
   val breadcrumb = Throwable()
-  return this
-    .doOnSuccess { item ->
+  return this.doOnSuccess { item ->
       log(tag, "Single -> ".colorized(ANSI_BLUE) + toString(item), breadcrumb)
     }
     .doOnError { error ->
       log(tag, "Error in Single!")
       log(tag, error)
     }
-    .doOnDispose {
-      log(tag, "Single was disposed")
-    }
+    .doOnDispose { log(tag, "Single was disposed") }
     .doOnSubscribe {
       if (includeEvents) {
         log(tag, "Subscribed to")
@@ -74,22 +70,14 @@ fun <T> Single<T>.inspectEach(
 }
 
 /** Log everything that comes out of this Single */
-fun Completable.inspectEach(
-  tag: String? = null,
-  includeEvents: Boolean = true
-): Completable {
+fun Completable.inspectEach(tag: String? = null, includeEvents: Boolean = true): Completable {
   val breadcrumb = Throwable()
-  return this
-    .doOnComplete {
-      log(tag, "Completed!", breadcrumb)
-    }
+  return this.doOnComplete { log(tag, "Completed!", breadcrumb) }
     .doOnError { error ->
       log(tag, "Error in Completable!")
       log(tag, error)
     }
-    .doOnDispose {
-      log(tag, "Completable was disposed")
-    }
+    .doOnDispose { log(tag, "Completable was disposed") }
     .doOnSubscribe {
       if (includeEvents) {
         log(tag, "Subscribed to")

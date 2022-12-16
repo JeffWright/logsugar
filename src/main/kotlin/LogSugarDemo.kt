@@ -26,7 +26,11 @@ internal fun main() {
 
 internal class EntryPoint {
   fun main() {
-    LogSugar.configure(maxLineWidth = 200, maxLeftSectionWidth = 75) { tag, message ->
+    LogSugar.configure(
+      useColors = true,
+      maxLineWidth = 200,
+      maxLeftSectionWidth = 75,
+    ) { tag, message ->
       println("com.some.package.name D/$tag: $message")
       // Or if you're on Android:
       // Log.d(tag, message)
@@ -38,7 +42,7 @@ internal class EntryPoint {
     log()
     log("☝️but even just log() is useful, giving you a clickable link to the class & function name")
 
-    logDivider(".inspect(): effortlessly log the value of variables")
+    logDivider(".inspect(): effortlessly log the value of objects")
     val person = Person("Jeff", 42)
     person.inspect(tag = "optional tag")
     log("You can provide a transform to construct the message:")
@@ -119,10 +123,13 @@ internal class EntryPoint {
         a.compareTo(b)
       }
       .inspect("sorted again!") { "$it sorted in ${getNumOccurrences("B")} steps" }
+
+    // Also logs uncaught exceptions (can be disabled in configure())
+    null!!
   }
 }
 
-internal data class Person(val name: String, val age: Int)
+internal data class Person(val name: String, val favoriteNumber: Int)
 
 private val loremIpsum =
   """
