@@ -45,7 +45,7 @@ publishing {
         create<MavenPublication>("maven") {
 
             groupId = "com.github.JeffWright"
-            version = "0.3.3"
+            version = "0.3.4"
             artifactId = "logsugar"
 
             from(components["java"])

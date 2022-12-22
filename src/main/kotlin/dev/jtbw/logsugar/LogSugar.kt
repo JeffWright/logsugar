@@ -216,8 +216,8 @@ object LogSugar {
           ?: it.firstOrNull { isPreferred(it) } ?: it.firstOrNull { isAcceptable(it) } ?: it.first()
       }
 
-    return if (element.methodName == "invoke") {
-      element.className
+    return if (element.methodName == "invoke" || element.methodName == "invokeSuspend") {
+      element.className.substringAfter("$")
     } else {
       "${element.methodName}()"
     }
