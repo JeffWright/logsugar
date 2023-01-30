@@ -42,8 +42,4 @@ NOTE: Android logcat supports color but Android Studio's logcat view does not. ð
 
 ![](img/result.png)
 
-## Usage:
-
-### Configure
-
 Author: Jeff Wright
