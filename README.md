@@ -19,16 +19,24 @@ implementation("com.github.JeffWright:logsugar:<VERSION>")
 Optional: Call this from wherever you want. `configure()` has additional options.
 ```kotlin
 LogSugar.configure { tag, message ->
-  println("com.some.package.name D/$tag: $message")
-  // Or if you're on Android:
-  // Log.d(tag, message)
+  // If you're on Android, this looks good with Android Studio's "compact" view.  If you're not, you can use println() or anything else
+  Log.d("LogSugar", "$tag: $message")
 }
 ```
 
 Use it:
 ```kotlin
-log("some message")
-someObject.inspect("user")
+class LogSugarDemo {
+  fun demo() {    
+    log("some message")
+    someObject.inspect()
+  }
+}
+```
+Shows:
+```
+16:40:55.076  D  .(LogSugarDemo.kt:8): 0.002s      demo() 🍬 some message
+16:40:55.077  D  .(LogSugarDemo.kt:9): 0.002s      demo() 🍬 SomeObject(prop1=something, prop2=42)
 ```
 
 ## Full Demo
