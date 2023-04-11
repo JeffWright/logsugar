@@ -16,6 +16,8 @@ build.gradle.kts:
 ```kotlin
 implementation("com.github.JeffWright:logsugar:<VERSION>")
 ```
+([find the latest version here](https://github.com/JeffWright/logsugar/tags))
+
 Optional: Call this from wherever you want. `configure()` has additional options.
 ```kotlin
 LogSugar.configure { tag, message ->

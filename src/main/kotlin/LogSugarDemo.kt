@@ -19,6 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.runBlocking
+import java.lang.RuntimeException
 
 internal fun main() {
   EntryPoint().main()
@@ -125,7 +126,7 @@ internal class EntryPoint {
       .inspect("sorted again!") { "$it sorted in ${getNumOccurrences("B")} steps" }
 
     // Also logs uncaught exceptions (can be disabled in configure())
-    null!!
+    throw RuntimeException("Demo exception")
   }
 }
 
