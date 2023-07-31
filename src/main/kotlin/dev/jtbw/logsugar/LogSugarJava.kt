@@ -11,8 +11,6 @@ fun <T> inspectJava(
   return item.inspect(tag = tag)
 }
 
-fun <T> inspectJava(
-  item: T
-): T {
+fun <T> inspectJava(item: T): T {
   return item.inspect()
 }

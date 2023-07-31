@@ -5,6 +5,7 @@ import dev.jtbw.logsugar.inspect
 import dev.jtbw.logsugar.inspectEach
 import dev.jtbw.logsugar.log
 import dev.jtbw.logsugar.logDivider
+import dev.jtbw.logsugar.logMultiple
 import dev.jtbw.logsugar.logOccurrence
 import dev.jtbw.logsugar.logStackTrace
 import dev.jtbw.logsugar.logTiming
@@ -15,11 +16,12 @@ import dev.jtbw.logsugar.startTiming
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
+import java.lang.RuntimeException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.runBlocking
-import java.lang.RuntimeException
 
 internal fun main() {
   EntryPoint().main()
@@ -41,7 +43,11 @@ internal class EntryPoint {
     log(tag = "Custom left tag", details = "You can provide both the left tag and the details")
     log("\uD83D\uDC48 But tag is optional and defaults to the name of the surrounding function")
     log()
-    log("☝️but even just log() is useful, giving you a clickable link to the class & function name")
+    log("☝️ even just log() is useful, giving you a clickable link to the class & function name")
+    logMultiple(listOf("you can", "also log", "multiline messages!"))
+    log("And non-strings")
+    log(5)
+    log(null)
 
     logDivider(".inspect(): effortlessly log the value of objects")
     val person = Person("Jeff", 42)
@@ -54,21 +60,26 @@ internal class EntryPoint {
         .first()
         .inspect("first initial")
 
-    logDivider(".inspectEach() extension")
     log("On Collections...")
-    listOf(10, 11, 12).inspectEach("some list")
+    listOf(10, 11, 12).inspect("some list")
     log("On Maps...")
-    mapOf("A" to 1, "B" to 2, "C" to 3).inspectEach("some map")
+    mapOf("A" to 1, "B" to 2, "C" to 3).inspect("some map")
 
     log("On Flows...")
-    runBlocking { flowOf(1, 2, 3).inspectEach("some flow").launchIn(this) }
-    log("All versions of .inspectEach() still have the optional transform:")
-    runBlocking { flowOf(1, 2, 3).inspectEach("some flow") { "item was $it" }.launchIn(this) }
+    runBlocking { flowOf(1, 2, 3).inspect("some flow").launchIn(this) }
+
+    log("And on nested maps/collections, too!")
+    mapOf("Player1" to mapOf("HP" to 10, "Mana" to 20), "Player2" to mapOf("HP" to 15, "Mana" to 0))
+      .inspect("nested inspect")
+
+    log("For all 'collection-likes', use .inspectEach() if you want to override the toString used")
+    mapOf("Player1" to mapOf("HP" to 10, "Mana" to 20), "Player2" to mapOf("HP" to 15, "Mana" to 0))
+      .inspectEach("not fancy") { it.toString() }
 
     log("On RxJava Observables/Singles/Completables")
-    Observable.just("X", "Y", "Z").inspectEach("Observable").blockingLast()
-    Single.just("lonely").inspectEach("Single").blockingGet()
-    Completable.fromCallable { "completeme" }.inspectEach("Completable").blockingGet()
+    Observable.just("X", "Y", "Z").inspect("Observable").blockingLast()
+    Single.just("lonely").inspect("Single").blockingGet()
+    Completable.fromCallable { "completeme" }.inspect("Completable").blockingGet()
 
     logDivider("Exceptions & Stack Traces")
     runCatching { null!! }.exceptionOrNull()?.inspect("oops!")

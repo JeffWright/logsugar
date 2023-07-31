@@ -56,9 +56,7 @@ fun <T> Single<T>.inspectEach(
       log(tag, "Error in Single!", breadcrumb)
       log(tag, error)
     }
-    .doOnDispose {
-      log(tag, "Single was disposed", breadcrumb)
-    }
+    .doOnDispose { log(tag, "Single was disposed", breadcrumb) }
     .doOnSubscribe {
       if (includeEvents) {
         log(tag, "Subscribed to", breadcrumb)
@@ -79,9 +77,7 @@ fun Completable.inspectEach(tag: String? = null, includeEvents: Boolean = false)
       log(tag, "Error in Completable!", breadcrumb)
       log(tag, error)
     }
-    .doOnDispose {
-      log(tag, "Completable was disposed", breadcrumb)
-    }
+    .doOnDispose { log(tag, "Completable was disposed", breadcrumb) }
     .doOnSubscribe {
       if (includeEvents) {
         log(tag, "Subscribed to", breadcrumb)
