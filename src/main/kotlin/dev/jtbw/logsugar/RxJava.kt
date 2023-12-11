@@ -16,7 +16,7 @@ fun <T> Observable<T>.inspectEach(
       when {
         notification.isOnNext -> {
           val item = notification.value!!
-          log(tag, "[$count] -> ".colorized(ANSI_BLUE) + toString(item), breadcrumb)
+          log(tag, "[$count] -> ".maybeColorized(ANSI_BLUE) + toString(item), breadcrumb)
           count++
         }
         notification.isOnError -> {
@@ -50,7 +50,7 @@ fun <T> Single<T>.inspectEach(
 ): Single<T> {
   val breadcrumb = Throwable()
   return this.doOnSuccess { item ->
-      log(tag, "Single -> ".colorized(ANSI_BLUE) + toString(item), breadcrumb)
+      log(tag, "Single -> ".maybeColorized(ANSI_BLUE) + toString(item), breadcrumb)
     }
     .doOnError { error ->
       log(tag, "Error in Single!", breadcrumb)

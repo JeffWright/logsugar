@@ -8,7 +8,7 @@ fun <T, I : Collection<T>> I.inspectEach(tag: String? = null, toString: ((T) -> 
       add(summarize(collection))
       if (toString != null) {
         collection.forEachIndexed { idx, value ->
-          add(("  [$idx] -> ").colorized(ANSI_BLUE) + toString(value).toString())
+          add(("  [$idx] -> ").maybeColorized(ANSI_BLUE) + toString(value).toString())
         }
       } else {
         addAll(collection.describe(indentLevel = 1))
@@ -32,7 +32,7 @@ fun <KEY, VALUE, MAP : Map<KEY, VALUE>> MAP.inspectEach(
     buildList {
       add(summarize(map))
       map.forEach { (key, value) ->
-        add(("  $key -> ").colorized(ANSI_BLUE) + toString(value).toString())
+        add(("  $key -> ").maybeColorized(ANSI_BLUE) + toString(value).toString())
       }
     }
   )
@@ -58,12 +58,12 @@ private fun summarize(obj: Any?): String {
     is Collection<*> -> {
       val size = obj.size
       val clazz = obj::class.simpleName
-      "($clazz, size = $size)".colorized(ANSI_BLUE)
+      "($clazz, size = $size)".maybeColorized(ANSI_BLUE)
     }
     is Map<*, *> -> {
       val size = obj.size
       val clazz = obj::class.simpleName
-      "($clazz, size = $size)".colorized(ANSI_BLUE)
+      "($clazz, size = $size)".maybeColorized(ANSI_BLUE)
     }
     else -> error("cannot summarize $obj")
   }
@@ -90,17 +90,17 @@ private fun Map<*, *>.describe(indentLevel: Int): List<String> {
 private fun describeLines(label: String, v: Any?, indentLevel: Int): List<String> {
   return when (v) {
     is Collection<*> -> {
-      listOf(indent(indentLevel) + ("$label -> ").colorized(ANSI_BLUE) + summarize(v)) +
+      listOf(indent(indentLevel) + ("$label -> ").maybeColorized(ANSI_BLUE) + summarize(v)) +
         v.describe(indentLevel + 1)
     }
     is Map<*, *> -> {
-      listOf(indent(indentLevel) + ("$label -> ").colorized(ANSI_BLUE) + summarize(v)) +
+      listOf(indent(indentLevel) + ("$label -> ").maybeColorized(ANSI_BLUE) + summarize(v)) +
         v.describe(indentLevel + 1)
     }
-    else -> listOf(indent(indentLevel) + ("$label -> ").colorized(ANSI_BLUE) + (v))
+    else -> listOf(indent(indentLevel) + ("$label -> ").maybeColorized(ANSI_BLUE) + (v))
   }
 }
 
 private fun indent(level: Int): String {
-  return ("  |".repeat(level) + "-- ").colorized(ANSI_WHITE)
+  return ("  |".repeat(level) + "-- ").maybeColorized(ANSI_WHITE)
 }

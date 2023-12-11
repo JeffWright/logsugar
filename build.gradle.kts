@@ -40,12 +40,17 @@ ktfmt {
     googleStyle() // 2-space indentation
 }
 
+java {
+    // Publish Sources
+    withSourcesJar()
+}
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
 
             groupId = "com.github.JeffWright"
-            version = "0.3.4"
+            version = "0.5.1"
             artifactId = "logsugar"
 
             from(components["java"])

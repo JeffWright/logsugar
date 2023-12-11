@@ -15,12 +15,12 @@ object LogSugarTiming {
     val elapsed = end - start
     return buildString {
       append("⌛ ")
-      append(formatTime(elapsed).colorized(ANSI_BRIGHT_RED))
+      append(formatTime(elapsed).maybeColorized(ANSI_BRIGHT_RED))
       forr?.let {
         append(" for ")
-        append(it.toString().colorized(ANSI_BRIGHT_BLUE))
+        append(it.toString().maybeColorized(ANSI_BRIGHT_BLUE))
       }
-      append(" (started @ ${formatTime(start)})".colorized(ANSI_GREEN))
+      append(" (started @ ${formatTime(start)})".maybeColorized(ANSI_GREEN))
     }
   }
 }
@@ -34,7 +34,7 @@ private val timers: MutableMap<Any, Long> = mutableMapOf()
 fun startTiming(key: Any, alsoLog: Boolean = false) {
   timers[key] = currentTime
   if (alsoLog) {
-    log("⌛ starting timer for ".colorized(ANSI_BLUE) + key.toString().colorized(ANSI_BRIGHT_BLUE))
+    log("⌛ starting timer for ".maybeColorized(ANSI_BLUE) + key.toString().maybeColorized(ANSI_BRIGHT_BLUE))
   }
 }
 

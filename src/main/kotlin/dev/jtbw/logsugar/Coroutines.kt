@@ -11,7 +11,7 @@ fun <T> Flow<T>.inspectEach(
   var count = 0
   val breadcrumb = Throwable()
   return this.onEach {
-    log(tag, "[$count] -> ".colorized(ANSI_BLUE) + toString(it), breadcrumb)
+    log(tag, "[$count] -> ".maybeColorized(ANSI_BLUE) + toString(it), breadcrumb)
     count++
   }
 }

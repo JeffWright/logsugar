@@ -16,9 +16,9 @@ fun logOccurrence(key: Any, details: String? = null): Long {
   val c = countOccurrence(key)
   log(
     buildString {
-      append("#️⃣ N = $c".colorized(ANSI_BRIGHT_RED))
+      append("#️⃣ N = $c".maybeColorized(ANSI_BRIGHT_RED))
       append(" for ")
-      append(key.toString().colorized(ANSI_BRIGHT_BLUE))
+      append(key.toString().maybeColorized(ANSI_BRIGHT_BLUE))
       details?.let {
         append(": ")
         append(it)

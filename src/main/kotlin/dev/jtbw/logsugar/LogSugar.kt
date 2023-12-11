@@ -152,8 +152,8 @@ object LogSugar {
   ) {
 
     val tag = getClassBreadcrumb(breadcrumb)
-    val infoLeft = timeFmt.colorized(ANSI_YELLOW)
-    val infoRight = header.colorized(ANSI_BRIGHT_GREEN)
+    val infoLeft = timeFmt.maybeColorized(ANSI_YELLOW)
+    val infoRight = header.maybeColorized(ANSI_BRIGHT_GREEN)
 
     val infoLeftWidth = infoLeft.width()
     val infoRightWidth = infoRight.width()
@@ -259,7 +259,7 @@ fun logWtf(tag: String?, details: String?, breadcrumb: Throwable? = null) =
     log(tag, "")
   }
 
-private fun String.colorizedWtf(): String = colorized(ANSI_RED_BG, ANSI_BRIGHT_BLACK)
+private fun String.colorizedWtf(): String = maybeColorized(ANSI_RED_BG, ANSI_BRIGHT_BLACK)
 
 /** Print a stack trace */
 fun log(err: Throwable) = log(null, err)
@@ -269,7 +269,7 @@ fun log(tag: String? = null, err: Throwable) {
   log(
     tag,
     err.stackTraceToString().let { stackTrace ->
-      val firstLine = stackTrace.substringBefore("\n").colorized(ANSI_BRIGHT_RED)
+      val firstLine = stackTrace.substringBefore("\n").maybeColorized(ANSI_BRIGHT_RED)
       firstLine + "\n" + stackTrace.substringAfter("\n")
     }
   )
@@ -312,9 +312,9 @@ fun logDivider(message: String? = null, weight: Int = 3) {
         0 -> ". $it ."
         1 -> "◁ $it ▷     "
         2 -> "◀ $it ▶"
-        3 -> "◀ $it ▶".colorized(ANSI_YELLOW)
-        4 -> "  $it  ".colorized(ANSI_BRIGHT_YELLOW)
-        5 -> "  $it  ".colorized(ANSI_BRIGHT_YELLOW_BG, ANSI_BRIGHT_BLACK)
+        3 -> "◀ $it ▶".maybeColorized(ANSI_YELLOW)
+        4 -> "  $it  ".maybeColorized(ANSI_BRIGHT_YELLOW)
+        5 -> "  $it  ".maybeColorized(ANSI_BRIGHT_YELLOW_BG, ANSI_BRIGHT_BLACK)
         else -> error("Please report this to the maintainer of LogSugar")
       }
     }
@@ -341,9 +341,9 @@ fun logDivider(message: String? = null, weight: Int = 3) {
       else -> error("Please report this to the maintainer of LogSugar")
     }
 
-  val pre = rule.repeat(3).colorized(ruleColor)
+  val pre = rule.repeat(3).maybeColorized(ruleColor)
   val text = formattedMessage
-  val post = rule.repeat(10).colorized(ruleColor)
+  val post = rule.repeat(10).maybeColorized(ruleColor)
   log("$pre$text$post")
 }
 
